@@ -25,5 +25,20 @@ class RWRRunner:
         return P[:, Source].T.tolist()[0]
 
     def RandomWalkTest(self) -> dict:
-        
-        
+        RWRCopilot = RWRRunner(self.G, self.Source)
+        return RWRCopilot.RandomWalkWithRestarts()
+
+
+OldG = nx.Graph()
+NodeSet = list()
+CommSet = list()
+
+# f1 = csv.reader(open("WHPINEdges.csv"))
+
+
+with open("WHPINEdges.csv") as file:
+    edges = file.readlines()
+    for edge in edges:
+        OldG.add_edge(edge.split(",")[0], edge.split(",")[1])
+print(OldG.number_of_nodes())
+print(OldG.number_of_edges())
