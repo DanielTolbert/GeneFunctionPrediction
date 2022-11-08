@@ -6,7 +6,7 @@ neighbors = {}
 node_index = {}
 
 def human_ppi_parser():
-    ppi_file = open("pathlinker-human-network.txt",'r')
+    ppi_file = open("human_interactome_weighted.txt",'r')
     ppi_lines = ppi_file.readlines()
     g = nx.DiGraph()
 
@@ -32,7 +32,6 @@ def human_ppi_parser():
             neighbors[data[0]].append(data[1])
 
     return g
-
 
 #given a graph and alpha: return a reguralized lapacian
 def rl(g,alpha):
@@ -71,9 +70,20 @@ def rl(g,alpha):
     
     return reg_laplacian
 
-def regularized_laplacian(go_id):
+#will run for each go_term, printing out results in their own file within rl_output folder
+def regularized_laplacian():
     g = human_ppi_parser()
     reg_laplacian = rl(g,1)
 
-    #s(u) = (I + alpha*L~)^-1 * y(u) [y -> 1/nodes_visited:0 positive:otherwise]
+    #s(u) = (I + alpha*L~)^-1 * y(u) [y -> 1/nodes_visited:0 (directly or decendent):else]
     #s(u) = reg_laplacian * y
+
+    #PSEUDOCODE, NOT FINALIZED -> HIGH LEVEL IDEA
+
+    #for every go_id in T, change y-vector depending on y-vector
+    T = [] #insert here the positive examples from Hajar
+    for go_id in T:
+        outfile = open(f"rl/rl_output_{go_id}")
+        y = 0 #this is the y vector given by function by Hajar
+        s = reg_laplacian @ y
+        outfile.write(f"{s}\n")
