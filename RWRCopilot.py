@@ -2,7 +2,7 @@ import networkx as nx
 import random as random
 
 class RWRRunner:
-    def __init__(self, G, Source) -> None:
+    def __init__(self, G: nx.Graph(), Source) -> None:
         self.G = G
         self.Source = Source
 
@@ -29,16 +29,21 @@ class RWRRunner:
         return RWRCopilot.RandomWalkWithRestarts()
 
 
-OldG = nx.Graph()
-NodeSet = list()
-CommSet = list()
+OldG = nx.karate_club_graph()
 
 # f1 = csv.reader(open("WHPINEdges.csv"))
 
 
-with open("WHPINEdges.csv") as file:
-    edges = file.readlines()
-    for edge in edges:
-        OldG.add_edge(edge.split(",")[0], edge.split(",")[1])
+# with open("EGFR1Edges.csv") as file:
+#     edges = file.readlines()
+#     for edge in edges:
+#         OldG.add_edge(edge.split(",")[0], edge.split(",")[1])
 print(OldG.number_of_nodes())
 print(OldG.number_of_edges())
+
+print(type(OldG.nodes()))
+
+runner = RWRRunner(OldG)
+print(runner.RandomWalkTest())
+
+
