@@ -1,6 +1,7 @@
 import networkx as nx
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import inv
+from random import randint
 
 neighbors = {}
 node_index = {}
@@ -71,13 +72,14 @@ def rl(g,alpha):
     return reg_laplacian
 
 #will run for each go_term, printing out results in their own file within rl_output folder
-def regularized_laplacian():
+def regularized_laplacian(alpha):
     g = human_ppi_parser()
-    reg_laplacian = rl(g,1)
+    reg_laplacian = rl(g,alpha)
 
     #s(u) = (I + alpha*L~)^-1 * y(u) [y -> 1/nodes_visited:0 (directly or decendent):else]
     #s(u) = reg_laplacian * y
 
+    '''
     #PSEUDOCODE, NOT FINALIZED -> HIGH LEVEL IDEA
 
     #for every go_id in T, change y-vector depending on y-vector
@@ -87,3 +89,20 @@ def regularized_laplacian():
         y = 0 #this is the y vector given by function by Hajar
         s = reg_laplacian @ y
         outfile.write(f"{s}\n")
+    '''
+    node_len = len(list(g.nodes))
+    data = []
+    row = []
+    coln = [0] * len(list(g.nodes))
+    for x in list(g.nodes()):
+        data.append(randint(0,1))
+        row.append(node_index[x])
+    outfile = open(f"rl outputs/tests/rl_test_{alpha}.txt", 'w')
+
+    y = csc_matrix((data, (row, coln)),shape=(node_len,1))
+    s = reg_laplacian @ y
+    outfile.write("protein\ts val\ty val\n")
+    for i in node_index:
+        outfile.write(f"{i}\t{s[node_index[i]].toarray()[0][0]}\t\t{y[node_index[i]].toarray()[0][0]}\n")
+
+regularized_laplacian(10000)
