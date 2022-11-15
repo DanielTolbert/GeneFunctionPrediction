@@ -3,6 +3,9 @@ from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import inv
 from random import randint
 
+from parser_module import Annotation_Parser, ROOT_TERMS
+import numpy as np
+
 neighbors = {}
 node_index = {}
 
@@ -72,37 +75,33 @@ def rl(g,alpha):
     return reg_laplacian
 
 #will run for each go_term, printing out results in their own file within rl_output folder
-def regularized_laplacian(alpha):
+def all_regularized_laplacian(alpha):
+
     g = human_ppi_parser()
     reg_laplacian = rl(g,alpha)
 
-    #s(u) = (I + alpha*L~)^-1 * y(u) [y -> 1/nodes_visited:0 (directly or decendent):else]
-    #s(u) = reg_laplacian * y
-
-    '''
-    #PSEUDOCODE, NOT FINALIZED -> HIGH LEVEL IDEA
-
-    #for every go_id in T, change y-vector depending on y-vector
-    T = [] #insert here the positive examples from Hajar
-    for go_id in T:
-        outfile = open(f"rl/rl_output_{go_id}")
-        y = 0 #this is the y vector given by function by Hajar
-        s = reg_laplacian @ y
-        outfile.write(f"{s}\n")
-    '''
+    #default threshold is 1%
+    #make sure these files are in the expected directory
+    data = Annotation_Parser('go.obo', 'goa_human.gaf', 'human_interactome_weighted.txt', threshold=10)
+    T_10 = data.T
+    #data.stacked_plot()
     node_len = len(list(g.nodes))
-    data = []
-    row = []
-    coln = [0] * len(list(g.nodes))
-    for x in list(g.nodes()):
-        data.append(randint(0,1))
-        row.append(node_index[x])
-    outfile = open(f"rl outputs/tests/rl_test_{alpha}.txt", 'w')
 
-    y = csc_matrix((data, (row, coln)),shape=(node_len,1))
-    s = reg_laplacian @ y
-    outfile.write("protein\ts val\ty val\n")
-    for i in node_index:
-        outfile.write(f"{i}\t{s[node_index[i]].toarray()[0][0]}\t\t{y[node_index[i]].toarray()[0][0]}\n")
+    for namespace in ROOT_TERMS:
+        for term in T_10[namespace]:
+            pos, neg = data.examples(term)
+            val = []
+            row = []
+            coln = [0] * node_len
+            for x in list(g.nodes()):
+                val.append(pos[data.gene_index(x)])
+                row.append(node_index[x])
 
-regularized_laplacian(10000)
+            outfile = open(f"rl outputs/tests/{term[3:]}_{alpha}.txt", 'w')
+            y = csc_matrix((val, (row, coln)),shape=(node_len,1))
+            s = reg_laplacian @ y
+            outfile.write("protein\ts val\ty val\n")
+            for i in node_index:
+                outfile.write(f"{i}\t{s[node_index[i]].toarray()[0][0]}\t\t{y[node_index[i]].toarray()[0][0]}\n")
+            
+all_regularized_laplacian(1)
