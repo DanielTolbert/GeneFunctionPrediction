@@ -22,13 +22,13 @@ prodTranspose = prod.transpose()
 
 identityMatrix = np.identity(adj.shape[0])
 
-vectorStationaryProbabilities = np.linalg.inv(identityMatrix - ((1 - 0.15) * prodTranspose))
+vectorStationaryProbabilities = np.linalg.inv(identityMatrix - ((1 - 0.5) * prodTranspose))
 
 a = np.array(vectorStationaryProbabilities)
 
 b = np.array(s)
 
-vectorStationaryProbabilities = np.dot(a, b)
+vectorStationaryProbabilities = np.dot(a, b) * .5
 
 print(vectorStationaryProbabilities)
 
