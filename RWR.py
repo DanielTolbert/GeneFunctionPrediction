@@ -33,6 +33,7 @@ G = data.interactome
 vectorStationaryProbabilities = np.load('vectorStationaryProbabilities.npy')
 # For each go term, change the value below, I suggest using a different output file each time.
 pos, neg = data.examples('GO:0048523')
+print("Go term is: GO:0048523")
 # print(pos) # In order to randomly set some positive examples to 0, set newVar equal to the new value of pos with some positive values set to 0.
 # newVar = 
 # Replace pos in line 38 with newVar
@@ -51,7 +52,6 @@ value_key_pairs = ((value, key) for (key,value) in dictVectorStationaryProbabili
 sorted_value_key_pairs = sorted(value_key_pairs, reverse=True)
 t2 = time.time()
 print("Run took seconds: ", t2 - t)
-print("Below is the positive examples: ")
 nodeDict = dict(zip(data.genes, range(len(G.nodes()))))
 for i in range(len(sorted_value_key_pairs)):
     if pos[nodeDict.get(sorted_value_key_pairs[i][1])] == 1:
