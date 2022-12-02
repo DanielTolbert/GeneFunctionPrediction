@@ -55,9 +55,9 @@ print("Below is the positive examples: ")
 nodeDict = dict(zip(data.genes, range(len(G.nodes()))))
 for i in range(len(sorted_value_key_pairs)):
     if pos[nodeDict.get(sorted_value_key_pairs[i][1])] == 1:
-        print("Node: ", sorted_value_key_pairs[i][1], " Score: ", sorted_value_key_pairs[i][0])
+        print("Node: ", sorted_value_key_pairs[i][1], " Score: ", sorted_value_key_pairs[i][0], " Positive Example")
     elif neg[nodeDict.get(sorted_value_key_pairs[i][1])] == 1:
-        print("Node: ", sorted_value_key_pairs[i][1], " Score: ", sorted_value_key_pairs[i][0], " False Positive")
+        print("Node: ", sorted_value_key_pairs[i][1], " Score: ", sorted_value_key_pairs[i][0], " Negative Example")
     else:
         print("Node: ", sorted_value_key_pairs[i][1], " Score: ", sorted_value_key_pairs[i][0], " Non Example")
 print(np.sum(vectorStationaryProbabilities))
