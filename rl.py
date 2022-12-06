@@ -3,6 +3,7 @@ from scipy.sparse import csc_matrix, identity, eye
 from scipy.sparse.linalg import inv
 import scipy.sparse as sp
 import pandas as pd
+import os
 
 from parser_module import Annotation_Parser, ROOT_TERMS
 import numpy as np
@@ -79,15 +80,9 @@ def all_regularized_laplacian(alpha):
     #default threshold is 1%
     #make sure these files are in the expected directory
     data = Annotation_Parser('go.obo', 'goa_human.gaf', 'human_interactome_weighted.txt', threshold=10)
-    T_10 = data.T
     #data.stacked_plot()
     node_len = len(list(g.nodes))
-    
-    '''
-    for namespace in ROOT_TERMS:
-        for term in T_10[namespace]:
-    '''
-    for term in ["GO:0006357"]:
+    for term in ["GO:0048523","GO:0019538","GO:0043167","GO:0005515","GO:0005576","GO:0005829"]:
         pos,neg = data.examples(term)
         val = []
         row = []
@@ -96,12 +91,14 @@ def all_regularized_laplacian(alpha):
             val.append(pos[data.gene_index(x)])
             row.append(node_index[x])
 
-        outfile = open(f"rl outputs/tests/{term[3:]}_{alpha}.txt", 'w')
+        outfile = open(f"rl outputs/{term[3:]}.txt", 'w')
+        outfile.write("Node  Name  Score  Value  Example\n")
         y = csc_matrix((val, (row, coln)),shape=(node_len,1))
         s = reg_laplacian @ y
-        outfile.write("protein\ts val\ty val\n")
         for i in node_index:
-            outfile.write(f"{i}\t{s[node_index[i]].toarray()[0][0]}\t\t{y[node_index[i]].toarray()[0][0]}\n")
+            example = "Positive Example" if (int(y[node_index[i]].toarray()[0][0]) == 1) else "Non Example"
+            outfile.write(f"Node:  {i}  Score:  {s[node_index[i]].toarray()[0][0]}  {example}\n")
+        outfile.close()
         
 def murali_group(alpha):
     """
@@ -146,12 +143,8 @@ def murali_group(alpha):
     #make sure these files are in the expected directory
     data = Annotation_Parser('go.obo', 'goa_human.gaf', 'human_interactome_weighted.txt', threshold=10)
     #data.stacked_plot()
-    
-    '''
-    for namespace in ROOT_TERMS:
-        for term in T_10[namespace]:
-    '''
-    for term in ["GO:0006357"]:
+        
+    for term in ["GO:0048523","GO:0019538","GO:0043167","GO:0005515","GO:0005576","GO:0005829"]:
         pos,neg = data.examples(term)
         val = []
         row = []
@@ -160,11 +153,38 @@ def murali_group(alpha):
             val.append(pos[data.gene_index(x)])
             row.append(node_index[x])
 
-        outfile = open(f"rl outputs/tests/muraligroup_{term[3:]}_{alpha}.txt", 'w')
+        outfile = open(f"rl outputs/muraligroup_{term[3:]}.txt", 'w')
+        outfile.write("Node  Name  Score  Value  Example\n")
         y = csc_matrix((val, (row, coln)),shape=(node_len,1))
         s = m_inv.dot(y)
-        outfile.write("protein\ts val\ty val\n")
         for i in node_index:
-            outfile.write(f"{i}\t{s[node_index[i]].toarray()[0][0]}\t\t{y[node_index[i]].toarray()[0][0]}\n")
+            example = "Positive Example" if (int(y[node_index[i]].toarray()[0][0]) == 1) else "Non Example"
+            outfile.write(f"Node:  {i}  Score:  {s[node_index[i]].toarray()[0][0]}  {example}\n")
+        outfile.close()
 
-murali_group(int(input()))
+all_regularized_laplacian(1)
+murali_group(1)
+ 
+# iterate over files in directory
+for filename in os.listdir("rl outputs"):
+    outfile = os.path.join("rl outputs", filename)
+    # checking if it is a file
+    if os.path.isfile(outfile):
+        dataframe = pd.read_csv(outfile, sep="  ")
+        dataframe = dataframe.sort_values(by=['Value'], ascending=False)
+        dataframe.to_csv(outfile, sep='\t', index=False)
+        out = open(outfile, 'r')
+        final = []
+        lines = out.readlines()
+
+        skip = True
+        for line in lines:
+            if not skip:
+                final.append(line.replace('\t', '  '))
+            else:
+                skip = False
+        out.close()
+        out = open(outfile, 'w')
+        for line in final:
+            out.write(line)
+        out.close()
